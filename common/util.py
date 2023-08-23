@@ -67,4 +67,40 @@ def cosSimilarity(x, y, eps= 1e-8):
     
     return np.dot(nX, nY)
 
+
+def mostSimilar(query, wordToId, idToWord, wordMatrix, top= 5):
+    """검색어로 주어진 단어에 대해 비슷한 단어를 유사도 순으로 출력
+
+    Args:
+        query (str): 검색할 단어
+        wordToId (dict): 단어 - 단어 ID 딕셔너리
+        idToWord (dict): 단어 ID - 단어 딕셔너리
+        wordMatrix (mat): 단어 벡터 행렬. 각 행에 대응하는 단어의 벡터 저장
+        top (int, optional): 상위 표현 개수. Defaults to 5.
+    """
     
+    # 검색어 추출
+    if query not in wordToId:
+        print("%s(을)를 찾을 수 없습니다."%query)
+        return
+    
+    print('\n[query] ' + query)
+    queryId = wordToId[query]
+    queryVec = wordMatrix[queryId]
+
+    # 코사인 유사도 계산
+    vocabSize = len(idToWord)
+    similarity = np.zeros(vocabSize)
+    for i in range(vocabSize):
+        similarity[i] = cosSimilarity(wordMatrix[i], queryVec)
+
+    # 코사인 유사도 기준으로 내림차순 출력
+    count = 0
+    for i in (-1 * similarity).argsort():
+        if idToWord[i] == query:
+            continue
+        print(' %s: %s' %(idToWord[i], similarity[i]))
+
+        count += 1
+        if count >= top:
+            return
